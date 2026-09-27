@@ -1,0 +1,30 @@
+services:
+  spt:
+    build: .
+    image: spt-server:local
+    container_name: spt
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${SPT_PORT:-6969}:${SPT_PORT:-6969}"   # localhost only: expose via a reverse proxy (nginx, Caddy)
+    environment:
+      SPT_VERSION: ${SPT_VERSION}
+      FIKA_VERSION: ${FIKA_VERSION:-}
+      SPT_BACKEND_IP: ${SPT_BACKEND_IP}
+      SPT_PORT: ${SPT_PORT:-6969}
+      SPT_BACKEND_PORT: ${SPT_BACKEND_PORT:-}
+      TZ: ${TZ:-Europe/Moscow}
+      # Workstation GC: noticeably less RAM than server GC on a small VPS
+      DOTNET_gcServer: "0"
+    volumes:
+      - ./server:/opt/spt/server            # SPT files (managed by entrypoint)
+      - ./mods:/opt/spt/server/user/mods    # server mods, same layout as SPT_Runtime/user/mods
+      - ./profiles:/opt/spt/server/user/profiles
+      - ./config:/opt/spt/config:ro         # optional overrides for SPT_Data/configs/*.json
+      # vanilla client bundles some mods (ManimalInterchange) check for on the server
+      - ./client-assets:/opt/spt/server/EscapeFromTarkov_Data/StreamingAssets/Windows:ro
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "3"

@@ -1,0 +1,11 @@
+.env
+sync.log
+*.log
+
+# runtime data on the server
+/server/
+/mods/
+/profiles/
+/config/
+/client-assets/
+/backups/
